@@ -2,109 +2,107 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-def run_vortex_layalina_scraper():
-    # المصدر الجديد: ليالينا (Layalina) لمواكبة التريندات
-    rss_url = "https://www.layalina.com/rss.xml"
+def run_vogue_premium_scraper():
+    # سحب المحتوى من Vogue مباشرة لضمان مطابقة التصميم
+    target_url = "https://www.vogue.com/celebrity-style"
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
     
     try:
-        # الرابط الإعلاني الخاص بك
+        # الرابط الربحي الخاص بك
         my_link = "https://data527.click/21330bf1d025d41336e6/4ba0cfe12d/?placementName=default"
         
-        response = requests.get(rss_url, headers=headers, timeout=20)
-        response.encoding = 'utf-8'
-        soup = BeautifulSoup(response.content, 'xml')
-        items = soup.find_all('item')
+        response = requests.get(target_url, headers=headers, timeout=20)
+        soup = BeautifulSoup(response.content, 'html.parser')
         
-        # 1. شريط تريند ليالينا العلوي
-        trend_html = ""
-        for i, item in enumerate(items[:5]):
-            title = item.title.text[:35] + "..."
-            trend_html += f'''
-            <div class="m-card">
-                <div class="m-team" style="color: #e91e63;">#Layalina_Trend</div>
-                <div class="m-score" style="background: #e91e63; color: #fff;">🔥 نيو</div>
-                <div class="m-team" style="font-size: 10px;">{title}</div>
-            </div>'''
-
-        # 2. شبكة أخبار المشاهير (Grid) بتصميم المربعات
-        news_grid_html = ""
-        for item in items[:16]:
-            title = item.title.text
-            img = "https://via.placeholder.com/400x300"
-            if item.find('enclosure'):
-                img = item.find('enclosure').get('url')
-            elif item.find('media:content'):
-                img = item.find('media:content').get('url')
+        # استخراج المقالات بناءً على هيكلية Vogue
+        articles = soup.find_all('div', class_='summary-item')
+        
+        news_html = ""
+        for item in articles[:10]:
+            title = item.find('h2').text if item.find('h2') else ""
+            img_tag = item.find('img')
+            img = img_tag.get('src') if img_tag else "https://via.placeholder.com/800x1000"
             
-            news_grid_html += f'''
-            <div class="n-card">
-                <a href="{my_link}" target="_blank">
-                    <div class="n-img">
-                        <img src="{img}" loading="lazy">
-                        <div class="n-badge">ليالينا</div>
-                    </div>
-                    <div class="n-info">
-                        <span style="color: #e91e63; font-size: 11px; font-weight: bold;">لايف ستايل</span>
-                        <h3>{title}</h3>
-                        <div class="n-footer">
-                            <span>⏱️ {datetime.now().strftime('%H:%M')}</span>
-                            <span class="n-more">مشاهدة</span>
+            if title:
+                news_html += f'''
+                <article class="vogue-item">
+                    <a href="{my_link}" target="_blank">
+                        <div class="vogue-img-container">
+                            <img src="{img}" loading="lazy">
                         </div>
-                    </div>
-                </a>
-            </div>'''
+                        <div class="vogue-meta">
+                            <span class="vogue-cat">أناقة المشاهير</span>
+                            <h2 class="vogue-title">{title}</h2>
+                            <p class="vogue-author">بقلم فورتكس ستايل</p>
+                        </div>
+                    </a>
+                </article>'''
 
         full_html = f'''<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VORTEX STARS | Layalina</title>
+    <title>VOGUE | Celebrity Style</title>
     
     <script src="https://data527.click/pfe/current/tag.min.js?z=8345712" data-cfasync="false" async></script>
     <script type='text/javascript' src='//pl25330eef.effectiveratecpm.com/26/33/0e/26330eef1cb397212db567d1385dc0b9.js'></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
     <style>
-        :root {{ --bg: #0b0d11; --card: #161a21; --accent: #e91e63; --text: #e1e1e1; }}
-        body {{ background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }}
-        header {{ background: var(--card); padding: 15px 5%; display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); position: sticky; top: 0; z-index: 1000; }}
-        .logo {{ font-size: 24px; font-weight: 900; color: #fff; text-decoration: none; }}
-        .logo span {{ color: var(--accent); }}
-        .container {{ max-width: 1200px; margin: 20px auto; padding: 0 15px; }}
-        .match-scroller {{ display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 25px; scrollbar-width: none; }}
-        .m-card {{ background: var(--card); min-width: 180px; padding: 12px; border-radius: 12px; border: 1px solid #252a33; text-align: center; }}
-        .m-team {{ font-size: 12px; font-weight: bold; margin: 5px 0; }}
-        .m-score {{ padding: 2px 8px; border-radius: 4px; display: inline-block; font-weight: 900; }}
-        .news-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }}
-        .n-card {{ background: var(--card); border-radius: 15px; overflow: hidden; border: 1px solid #232932; transition: 0.3s; }}
-        .n-card:hover {{ transform: translateY(-5px); border-color: var(--accent); }}
-        .n-card a {{ text-decoration: none; color: inherit; }}
-        .n-img {{ position: relative; height: 180px; }}
-        .n-img img {{ width: 100%; height: 100%; object-fit: cover; }}
-        .n-badge {{ position: absolute; top: 10px; right: 10px; background: var(--accent); color: #fff; font-size: 10px; font-weight: 900; padding: 3px 10px; border-radius: 5px; }}
-        .n-info {{ padding: 15px; }}
-        .n-info h3 {{ font-size: 15px; margin: 5px 0 15px 0; line-height: 1.6; height: 48px; overflow: hidden; font-weight: 700; }}
-        .n-footer {{ display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #888; }}
-        .n-more {{ color: var(--accent); border: 1px solid var(--accent); padding: 2px 10px; border-radius: 20px; }}
-        footer {{ background: #000; padding: 40px; text-align: center; border-top: 2px solid var(--accent); margin-top: 50px; }}
-        @media (max-width: 768px) {{ .news-grid {{ grid-template-columns: 1fr; }} .n-img {{ height: 220px; }} }}
+        body {{ background: #fff; color: #000; font-family: 'Cairo', sans-serif; margin: 0; overflow-x: hidden; }}
+        
+        header {{ border-bottom: 2px solid #000; padding: 20px 0; text-align: center; background: #fff; position: sticky; top: 0; z-index: 1000; }}
+        .vogue-logo {{ font-family: 'Playfair Display', serif; font-size: 60px; font-weight: 900; color: #000; text-decoration: none; letter-spacing: -3px; }}
+        
+        .container {{ max-width: 900px; margin: 0 auto; padding: 20px; }}
+
+        /* تصميم القائمة الطولية مثل Vogue تماماً */
+        .vogue-item {{ margin-bottom: 60px; border-bottom: 1px solid #eee; padding-bottom: 40px; }}
+        .vogue-item a {{ text-decoration: none; color: inherit; display: block; }}
+        
+        .vogue-img-container {{ width: 100%; height: auto; margin-bottom: 25px; }}
+        .vogue-img-container img {{ width: 100%; height: auto; display: block; }}
+        
+        .vogue-meta {{ text-align: right; padding: 0 10px; }}
+        .vogue-cat {{ display: block; font-size: 14px; font-weight: 900; margin-bottom: 15px; border-right: 4px solid #000; padding-right: 10px; }}
+        .vogue-title {{ font-size: 32px; font-weight: 700; line-height: 1.2; margin: 0 0 15px 0; }}
+        .vogue-author {{ font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; }}
+
+        /* قسم الاستكشاف */
+        .explore-box {{ border-top: 2px solid #000; padding: 40px 0; text-align: center; margin-top: 50px; }}
+        .explore-title {{ font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 30px; }}
+        .tag-list {{ display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }}
+        .tag-btn {{ padding: 12px 30px; background: #f0f0f0; color: #000; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 14px; transition: 0.3s; }}
+        .tag-btn:hover {{ background: #000; color: #fff; }}
+
+        @media (max-width: 600px) {{
+            .vogue-logo {{ font-size: 45px; }}
+            .vogue-title {{ font-size: 24px; }}
+        }}
     </style>
 </head>
 <body onclick="void(0)">
     <header>
-        <a href="#" class="logo">VORTEX<span>STARS</span></a>
-        <div style="color: #e91e63; font-size: 13px; font-weight: bold;">● مباشر</div>
+        <a href="#" class="vogue-logo">VOGUE</a>
     </header>
+
     <div class="container">
-        <div class="match-scroller">{trend_html}</div>
-        <h2 style="border-right: 5px solid var(--accent); padding-right: 15px; margin-bottom: 25px;">تريند المشاهير | ليالينا</h2>
-        <div class="news-grid">{news_grid_html}</div>
+        {news_html}
+
+        <div class="explore-box">
+            <h2 class="explore-title">استكشف حسب الموضوع</h2>
+            <div class="tag-list">
+                <a href="{my_link}" class="tag-btn" style="background:#000; color:#fff;">الجميع</a>
+                <a href="{my_link}" class="tag-btn">كيم كارداشيان</a>
+                <a href="{my_link}" class="tag-btn">كيندال جينر</a>
+                <a href="{my_link}" class="tag-btn">أناقة النجوم</a>
+            </div>
+        </div>
     </div>
-    <footer>
-        <div style="font-size: 26px; font-weight: 900; color: #fff;">VORTEX STARS</div>
-        <p style="font-size: 12px; color: #555;">أقوى تغطية لأخبار ليالينا والنجوم</p>
+
+    <footer style="padding: 50px; text-align: center; border-top: 1px solid #000; margin-top: 50px; background: #fff;">
+        <div class="vogue-logo" style="font-size: 30px;">VORTEX</div>
     </footer>
 </body>
 </html>'''
@@ -113,4 +111,4 @@ def run_vortex_layalina_scraper():
     except Exception as e: print(f"Error: {e}")
 
 if __name__ == "__main__":
-    run_vortex_layalina_scraper()
+    run_vogue_premium_scraper()
