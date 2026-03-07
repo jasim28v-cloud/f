@@ -2,64 +2,65 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-def run_vortex_stars_grid_scraper():
-    # مصدر أخبار المشاهير (سيدتي) لضمان جودة الصور والمحتوى
-    rss_url = "https://www.sayidaty.net/taxonomy/term/31/rss.xml"
+def run_vortex_layalina_scraper():
+    # المصدر الجديد: ليالينا (Layalina) لمواكبة التريندات
+    rss_url = "https://www.layalina.com/rss.xml"
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
     
     try:
         # الرابط الإعلاني الخاص بك
         my_link = "https://data527.click/21330bf1d025d41336e6/4ba0cfe12d/?placementName=default"
         
-        # 1. سحب أخبار "تريند اليوم" للقسم العلوي (بدل المباريات)
         response = requests.get(rss_url, headers=headers, timeout=20)
         response.encoding = 'utf-8'
         soup = BeautifulSoup(response.content, 'xml')
         items = soup.find_all('item')
         
+        # 1. شريط تريند ليالينا العلوي
         trend_html = ""
         for i, item in enumerate(items[:5]):
-            title = item.title.text[:30] + "..."
+            title = item.title.text[:35] + "..."
             trend_html += f'''
             <div class="m-card">
-                <div class="m-team" style="color: #e91e63;">#تريند_المشاهير</div>
-                <div class="m-score" style="background: #e91e63; color: #fff;">TOP {i+1}</div>
+                <div class="m-team" style="color: #e91e63;">#Layalina_Trend</div>
+                <div class="m-score" style="background: #e91e63; color: #fff;">🔥 نيو</div>
                 <div class="m-team" style="font-size: 10px;">{title}</div>
             </div>'''
 
-        # 2. سحب الأخبار لشبكة المربعات (Grid)
+        # 2. شبكة أخبار المشاهير (Grid) بتصميم المربعات
         news_grid_html = ""
-        for i, item in enumerate(items):
+        for item in items[:16]:
             title = item.title.text
             img = "https://via.placeholder.com/400x300"
             if item.find('enclosure'):
                 img = item.find('enclosure').get('url')
+            elif item.find('media:content'):
+                img = item.find('media:content').get('url')
             
             news_grid_html += f'''
             <div class="n-card">
                 <a href="{my_link}" target="_blank">
                     <div class="n-img">
                         <img src="{img}" loading="lazy">
-                        <div class="n-badge">حصري</div>
+                        <div class="n-badge">ليالينا</div>
                     </div>
                     <div class="n-info">
-                        <span style="color: #e91e63; font-size: 11px; font-weight: bold;">أخبار النجوم</span>
+                        <span style="color: #e91e63; font-size: 11px; font-weight: bold;">لايف ستايل</span>
                         <h3>{title}</h3>
                         <div class="n-footer">
                             <span>⏱️ {datetime.now().strftime('%H:%M')}</span>
-                            <span class="n-more">التفاصيل</span>
+                            <span class="n-more">مشاهدة</span>
                         </div>
                     </div>
                 </a>
             </div>'''
 
-        # 3. بناء الواجهة (Vortex Stars Grid UI)
         full_html = f'''<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VORTEX STARS | عالم المشاهير</title>
+    <title>VORTEX STARS | Layalina</title>
     
     <script src="https://data527.click/pfe/current/tag.min.js?z=8345712" data-cfasync="false" async></script>
     <script type='text/javascript' src='//pl25330eef.effectiveratecpm.com/26/33/0e/26330eef1cb397212db567d1385dc0b9.js'></script>
@@ -94,16 +95,16 @@ def run_vortex_stars_grid_scraper():
 <body onclick="void(0)">
     <header>
         <a href="#" class="logo">VORTEX<span>STARS</span></a>
-        <div style="color: #e91e63; font-size: 13px; font-weight: bold;">● مباشر الآن</div>
+        <div style="color: #e91e63; font-size: 13px; font-weight: bold;">● مباشر</div>
     </header>
     <div class="container">
         <div class="match-scroller">{trend_html}</div>
-        <h2 style="border-right: 5px solid var(--accent); padding-right: 15px; margin-bottom: 25px;">أحدث أخبار النجوم</h2>
+        <h2 style="border-right: 5px solid var(--accent); padding-right: 15px; margin-bottom: 25px;">تريند المشاهير | ليالينا</h2>
         <div class="news-grid">{news_grid_html}</div>
     </div>
     <footer>
         <div style="font-size: 26px; font-weight: 900; color: #fff;">VORTEX STARS</div>
-        <p style="font-size: 12px; color: #555;">أكبر منصة لمتابعة أخبار مشاهير الفن والسينما</p>
+        <p style="font-size: 12px; color: #555;">أقوى تغطية لأخبار ليالينا والنجوم</p>
     </footer>
 </body>
 </html>'''
@@ -112,4 +113,4 @@ def run_vortex_stars_grid_scraper():
     except Exception as e: print(f"Error: {e}")
 
 if __name__ == "__main__":
-    run_vortex_stars_grid_scraper()
+    run_vortex_layalina_scraper()
