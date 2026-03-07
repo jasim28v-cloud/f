@@ -1,4 +1,4 @@
-name: Update Stadium 24 Pro
+name: Update VORTEX STARS Pro
 
 on:
   schedule:
@@ -29,5 +29,5 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add index.html
-          git commit -m "Auto Update Stadium Pro: $(date)" || echo "No changes to commit"
+          git commit -m "Auto Update VORTEX STARS Pro: $(date)" || echo "No changes to commit"
           git push
