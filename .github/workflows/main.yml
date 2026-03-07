@@ -1,0 +1,34 @@
+name: Update Vortex Stars News
+
+on:
+  schedule:
+    - cron: '0 * * * *' # يعمل تلقائياً كل ساعة
+  workflow_dispatch: # يسمح لك بتشغيله يدوياً
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        pip install requests beautifulsoup4 lxml
+
+    - name: Run Celebrity Scraper
+      run: python celebrity_scraper.py
+
+    - name: Commit and push if changed
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add stars.html
+        git diff-index --quiet HEAD || git commit -m "Update Stars News" -a
+        git push
