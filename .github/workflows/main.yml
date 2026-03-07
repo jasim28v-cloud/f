@@ -1,34 +1,33 @@
-name: Update Vortex Stars News
+name: Update Stadium 24 Pro
 
 on:
   schedule:
-    - cron: '0 * * * *' # يعمل تلقائياً كل ساعة
-  workflow_dispatch: # يسمح لك بتشغيله يدوياً
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
-    - name: Install dependencies
-      run: |
-        pip install requests beautifulsoup4 lxml
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 lxml
 
-    - name: Run Celebrity Scraper
-      run: python celebrity_scraper.py
+      - name: Run Scraper
+        run: python scraper.py
 
-    - name: Commit and push if changed
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add stars.html
-        git diff-index --quiet HEAD || git commit -m "Update Stars News" -a
-        git push
+      - name: Commit and Push
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add index.html
+          git commit -m "Auto Update Stadium Pro: $(date)" || echo "No changes to commit"
+          git push
